@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Coleta de Dados Meteorológicos</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #eaf4ff, #f5f8fc);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: #263445;
+}
+
+.container {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    padding: 35px;
+    border-radius: 18px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.icon {
+    font-size: 45px;
+    margin-bottom: 12px;
+}
+
+h1 {
+    font-size: 23px;
+    color: #174c83;
+    margin-bottom: 10px;
+}
+
+.description {
+    font-size: 14px;
+    color: #718096;
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #d8e0ea;
+    border-radius: 9px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s;
+}
+
+input:focus {
+    border-color: #2878c7;
+    box-shadow: 0 0 0 3px rgba(40,120,199,0.1);
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-gps {
+    background: #e8f2fc;
+    color: #1765a8;
+    margin-bottom: 22px;
+}
+
+.btn-gps:hover {
+    background: #d8eafa;
+}
+
+.btn-submit {
+    background: #1769aa;
+    color: white;
+    margin-top: 8px;
+}
+
+.btn-submit:hover {
+    background: #105488;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.status {
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+    line-height: 1.5;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 12px;
+    color: #98a4b3;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div class="icon">🌦️</div>
+
+        <h1>Coleta de Dados Meteorológicos</h1>
+
+        <p class="description">
+            Informe o local e suas coordenadas geográficas
+            para registrar os dados da coleta.
+        </p>
+    </div>
+
+    <button type="button" class="btn-gps" id="gpsButton"
+        onclick="capturarGPS()">
+        📍 Usar minha localização
+    </button>
+
+    <form
+        id="formulario"
+        action="https://docs.google.com/forms/d/e/1FAIpQLSdFfmSZ4pHq3bXftHnOJKyhMh-QU7aF4FklyVbli_S5_KDhZA/formResponse"
+        method="POST"
+        target="_blank"
+    >
+
+        <div class="form-group">
+            <label for="local">Nome do local</label>
+
+            <input
+                type="text"
+                id="local"
+                name="entry.21366815"
+                placeholder="Ex: Campinas - SP"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="latitude">Latitude</label>
+
+            <input
+                type="number"
+                id="latitude"
+                name="entry.932986896"
+                placeholder="Ex: -22.9056"
+                step="any"
+                min="-90"
+                max="90"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="longitude">Longitude</label>
+
+            <input
+                type="number"
+                id="longitude"
+                name="entry.1829250565"
+                placeholder="Ex: -47.0608"
+                step="any"
+                min="-180"
+                max="180"
+                required
+            >
+        </div>
+
+        <button type="submit" class="btn-submit">
+            Enviar dados
+        </button>
+
+    </form>
+
+    <p class="status" id="status"></p>
+
+    <div class="footer">
+        Sistema de Coleta de Dados Meteorológicos
+    </div>
+
+</div>
+
+<script>
+
+function capturarGPS() {
+
+    const status = document.getElementById("status");
+    const botao = document.getElementById("gpsButton");
+
+    if (!navigator.geolocation) {
+        status.textContent =
+            "Seu navegador não suporta geolocalização.";
+        return;
+    }
+
+    botao.disabled = true;
+    botao.textContent = "Obtendo localização...";
+
+    status.textContent = "Aguardando permissão de localização...";
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            document.getElementById("latitude").value =
+                latitude.toFixed(7);
+
+            document.getElementById("longitude").value =
+                longitude.toFixed(7);
+
+            status.textContent =
+                "✓ Coordenadas capturadas com sucesso!";
+
+            botao.disabled = false;
+            botao.textContent = "📍 Atualizar localização";
+
+        },
+
+        function(error) {
+
+            let mensagem = "Não foi possível obter a localização.";
+
+            if (error.code === 1) {
+                mensagem = "Permita o acesso à localização no navegador.";
+            }
+
+            if (error.code === 2) {
+                mensagem = "Localização indisponível.";
+            }
+
+            if (error.code === 3) {
+                mensagem = "Tempo esgotado ao buscar localização.";
+            }
+
+            status.textContent = mensagem;
+
+            botao.disabled = false;
+            botao.textContent = "📍 Tentar novamente";
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+
+    );
+
+}
+
+document.getElementById("formulario").addEventListener(
+    "submit",
+    function(event) {
+
+        const latitude = parseFloat(
+            document.getElementById("latitude").value
+        );
+
+        const longitude = parseFloat(
+            document.getElementById("longitude").value
+        );
+
+        if (
+            !Number.isFinite(latitude) ||
+            latitude < -90 ||
+            latitude > 90
+        ) {
+            event.preventDefault();
+            alert("Informe uma latitude válida.");
+            return;
+        }
+
+        if (
+            !Number.isFinite(longitude) ||
+            longitude < -180 ||
+            longitude > 180
+        ) {
+            event.preventDefault();
+            alert("Informe uma longitude válida.");
+            return;
+        }
+
+        document.getElementById("status").textContent =
+            "Enviando dados para o Google Forms...";
+
+    }
+);
+
+</script>
+
+</body>
+</html>
